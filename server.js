@@ -4,6 +4,7 @@ const app = express()
 const cors = require('cors')
 const mongoose = require('mongoose')
 const User = require('./models/UserModel')
+const UserTransction = require('./models/UserTranscationDetails')
 const bcrypt = require('bcrypt')
 //const jwt = require('jsonwebtoken')
 //const secretKey = 'someCode123';
@@ -71,9 +72,47 @@ app.post('/api/login', async (req, res) => {
         return res.status(401).json({ status: 'error', message: 'Invalid login' });
     }
     else{
-        return res.json({status : true, userType : user.userRole});
+        return res.json({status : true, userType : user.userRole, email : user.email});
     }
 })
+
+app.post('/api/transcation', async (req,res)=>{
+    try{
+        await UserTransction.create({
+            account : req.body.account,
+            id : req.body.id,
+            description: req.body.description,
+            from : req.body.from,
+            to : req.body.to,
+            gasUsed : req.body.gasUsed,
+            email : req.body.email,
+            role : req.body.role,
+        })
+        res.json("Transcation Stored")
+    }
+    catch (err) {
+        // console.log(err)
+        res.json({
+            status: 'Error',error : 'Error'
+        })
+    }
+})
+
+app.get('/api/getTranscation', (req, res) => {
+    UserTransction.find()
+      .exec()
+      .then((allUserTranscationDetails) => {
+        console.log(allUserTranscationDetails); // Log the retrieved documents
+        return res.status(200).json(allUserTranscationDetails); // Send the documents as a JSON response
+      })
+      .catch((error) => {
+        console.error('Error querying user-transcation-details:', error);
+        return res.status(500).json({ error: 'Internal server error' });
+      });
+  });
+  
+
+
 app.listen(port, () => {
     console.log(`Server running on http://localhost:${port}`)
 })
